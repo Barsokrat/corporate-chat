@@ -26,6 +26,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initAuthListeners();
     // initChatListeners() теперь вызывается в showChatScreen()
+
+    // Обработка виртуального viewport для мобильных (Android)
+    if (window.visualViewport && window.innerWidth <= 768) {
+        window.visualViewport.addEventListener('resize', () => {
+            const messageInputContainer = document.querySelector('.message-input-container');
+            if (messageInputContainer) {
+                // Двигаем поле ввода вверх когда появляется клавиатура
+                const offsetTop = window.visualViewport.offsetTop;
+                const viewportHeight = window.visualViewport.height;
+                const windowHeight = window.innerHeight;
+
+                if (viewportHeight < windowHeight) {
+                    // Клавиатура открыта
+                    messageInputContainer.style.bottom = `${windowHeight - viewportHeight - offsetTop}px`;
+                } else {
+                    // Клавиатура закрыта
+                    messageInputContainer.style.bottom = '0px';
+                }
+            }
+        });
+    }
 });
 
 // === АВТОРИЗАЦИЯ ===
