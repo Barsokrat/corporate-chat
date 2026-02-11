@@ -11,6 +11,7 @@ let users = [];
 let groups = [];
 let messages = {};
 let typingTimeout = null;
+let unreadMessages = {}; // { chatId: count }
 
 // === ИНИЦИАЛИЗАЦИЯ ===
 document.addEventListener('DOMContentLoaded', () => {
@@ -207,6 +208,42 @@ function connectWebSocket() {
     };
 }
 
+// === НЕПРОЧИТАННЫЕ СООБЩЕНИЯ ===
+function getUnreadCount(chatId, type) {
+    return unreadMessages[chatId] || 0;
+}
+
+function incrementUnreadCount(chatId) {
+    unreadMessages[chatId] = (unreadMessages[chatId] || 0) + 1;
+    updateContactBadge(chatId);
+}
+
+function clearUnreadCount(chatId) {
+    unreadMessages[chatId] = 0;
+    updateContactBadge(chatId);
+}
+
+function updateContactBadge(chatId) {
+    const contactItem = document.querySelector(`.contact-item[data-id="${chatId}"]`);
+    if (!contactItem) return;
+
+    const existingBadge = contactItem.querySelector('.unread-badge');
+    const count = unreadMessages[chatId] || 0;
+
+    if (count > 0) {
+        if (existingBadge) {
+            existingBadge.textContent = count;
+        } else {
+            const badge = document.createElement('span');
+            badge.className = 'unread-badge';
+            badge.textContent = count;
+            contactItem.appendChild(badge);
+        }
+    } else if (existingBadge) {
+        existingBadge.remove();
+    }
+}
+
 function handleWebSocketMessage(data) {
     if (data.type === 'pong') {
         return;
@@ -225,18 +262,23 @@ function handleWebSocketMessage(data) {
     if (data.id && (data.content || data.file_url)) {
         addMessageToCache(data);
 
-        // Если это активный чат - добавить сообщение
-        if (activeChat &&
+        const isActiveChat = activeChat &&
             ((data.recipient_id === currentUser.id && data.sender_id === activeChat.id) ||
              (data.sender_id === currentUser.id && data.recipient_id === activeChat.id) ||
-             (data.group_id === activeChat.id))) {
+             (data.group_id === activeChat.id));
 
+        // Если это активный чат - добавить сообщение
+        if (isActiveChat) {
             // Проверить, не добавлено ли уже это сообщение
             const container = document.getElementById('messages-container');
             const existingMessage = container.querySelector(`[data-message-id="${data.id}"]`);
             if (!existingMessage) {
                 appendMessage(data);
             }
+        } else if (data.sender_id !== currentUser.id) {
+            // Если сообщение не в активном чате и не от нас - увеличить счётчик непрочитанных
+            const chatId = data.group_id || data.sender_id;
+            incrementUnreadCount(chatId);
         }
 
         // Обновить список контактов
@@ -400,12 +442,17 @@ function renderContactsList(contacts, type) {
         const name = type === 'group' ? contact.name : contact.full_name;
         const status = type === 'group' ? `${contact.members.length} участников` : 'Online';
 
+        // Подсчёт непрочитанных сообщений
+        const unreadCount = getUnreadCount(contact.id, type);
+        const unreadBadge = unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : '';
+
         item.innerHTML = `
             <div class="contact-avatar">${emoji}</div>
             <div class="contact-info">
                 <div class="contact-name">${name}</div>
                 <div class="contact-last-message">${status}</div>
             </div>
+            ${unreadBadge}
         `;
 
         // Поддержка touch и click событий для мобильных устройств
@@ -425,6 +472,9 @@ function renderContactsList(contacts, type) {
 
 async function openChat(contact, type) {
     activeChat = { ...contact, type };
+
+    // Обнулить счётчик непрочитанных
+    clearUnreadCount(contact.id);
 
     // Обновить UI
     document.querySelectorAll('.contact-item').forEach(item => {

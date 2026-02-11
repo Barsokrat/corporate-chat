@@ -296,6 +296,18 @@ body {
     background: var(--secondary-color);
 }
 
+.unread-badge {
+    background: var(--danger-color);
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: auto;
+    min-width: 20px;
+    text-align: center;
+}
+
 .contact-avatar {
     width: 48px;
     height: 48px;
