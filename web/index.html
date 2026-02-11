@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Chat</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Экран авторизации -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>💬 Corporate Chat</h1>
+                <p>Корпоративный мессенджер</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Вход</button>
+                <button class="tab-btn" data-tab="register">Регистрация</button>
+            </div>
+
+            <!-- Форма входа -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <div id="login-error" class="error-message"></div>
+            </form>
+
+            <!-- Форма регистрации -->
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label>Полное имя</label>
+                    <input type="text" id="register-fullname" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                <div id="register-error" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Экран чата -->
+    <div id="chat-screen" class="screen">
+        <div class="chat-container">
+            <!-- Левая панель: список контактов и групп -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="user-info">
+                        <div class="user-avatar">👤</div>
+                        <div class="user-details">
+                            <div class="user-name" id="current-user-name">Пользователь</div>
+                            <div class="user-status">Online</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-icon" id="logout-btn" title="Выйти">🚪</button>
+                </div>
+
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab active" data-type="users">👥 Пользователи</button>
+                    <button class="sidebar-tab" data-type="groups">💼 Группы</button>
+                </div>
+
+                <div class="sidebar-actions">
+                    <button class="btn btn-primary btn-small" id="create-group-btn">+ Создать группу</button>
+                </div>
+
+                <div class="contacts-list" id="contacts-list">
+                    <!-- Список контактов будет загружен динамически -->
+                </div>
+            </aside>
+
+            <!-- Основная область чата -->
+            <main class="chat-main">
+                <div class="chat-welcome">
+                    <div class="welcome-content">
+                        <h2>👋 Добро пожаловать!</h2>
+                        <p>Выберите контакт или группу для начала общения</p>
+                    </div>
+                </div>
+
+                <div class="chat-active" style="display: none;">
+                    <!-- Шапка чата -->
+                    <div class="chat-header">
+                        <div class="chat-info">
+                            <div class="chat-avatar">👤</div>
+                            <div class="chat-details">
+                                <div class="chat-name" id="active-chat-name">Имя чата</div>
+                                <div class="chat-status" id="active-chat-status">Online</div>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="btn btn-icon" id="chat-info-btn" title="Информация">ℹ️</button>
+                        </div>
+                    </div>
+
+                    <!-- Область сообщений -->
+                    <div class="messages-container" id="messages-container">
+                        <!-- Сообщения будут загружены динамически -->
+                    </div>
+
+                    <!-- Поле ввода -->
+                    <div class="message-input-container">
+                        <form id="message-form" class="message-form">
+                            <button type="button" class="btn btn-icon" id="attach-btn">📎</button>
+                            <input type="text"
+                                   id="message-input"
+                                   placeholder="Введите сообщение..."
+                                   autocomplete="off"
+                                   required>
+                            <button type="submit" class="btn btn-icon btn-send">📤</button>
+                        </form>
+                        <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                            <span class="typing-name"></span> печатает...
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания группы -->
+    <div id="create-group-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Создать группу</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="create-group-form">
+                <div class="form-group">
+                    <label>Название группы</label>
+                    <input type="text" id="group-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="group-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Участники</label>
+                    <div id="group-members-list" class="members-list">
+                        <!-- Список пользователей для выбора -->
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-close">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
