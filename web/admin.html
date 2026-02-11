@@ -277,7 +277,8 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000';
+        // Автоматическое определение API URL
+        const API_URL = window.location.protocol + '//' + window.location.host;
         let token = localStorage.getItem('token');
         let currentUser = null;
 
