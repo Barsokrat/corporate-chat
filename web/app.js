@@ -379,8 +379,15 @@ function renderContactsList(contacts, type) {
             </div>
         `;
 
-        item.addEventListener('click', () => {
+        // Поддержка touch и click событий для мобильных устройств
+        const handleOpen = () => {
             openChat(contact, type);
+        };
+
+        item.addEventListener('click', handleOpen);
+        item.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleOpen();
         });
 
         container.appendChild(item);

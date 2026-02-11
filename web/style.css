@@ -282,9 +282,13 @@ body {
     gap: 12px;
     cursor: pointer;
     transition: background 0.2s;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.contact-item:hover {
+.contact-item:hover,
+.contact-item:active {
     background: var(--hover-color);
 }
 
