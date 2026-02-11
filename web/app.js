@@ -1,6 +1,6 @@
-// Конфигурация API
-const API_URL = 'http://localhost:8000';
-const WS_URL = 'ws://localhost:8000';
+// Конфигурация API - автоматическое определение
+const API_URL = window.location.protocol + '//' + window.location.host;
+const WS_URL = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
 
 // Глобальное состояние
 let currentUser = null;
