@@ -672,6 +672,8 @@ body {
 
     .chat-main {
         display: none;
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height */
     }
 
     .sidebar.hide {
@@ -690,13 +692,27 @@ body {
         display: flex;
     }
 
-    /* Дополнительный отступ для iOS Safari */
+    /* Фиксируем поле ввода внизу экрана */
     .message-input-container {
-        padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 16px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        background: white;
+        border-top: 1px solid var(--border-color);
+        z-index: 100;
     }
 
-    /* Учитываем высоту клавиатуры */
+    /* Добавляем отступ снизу для контейнера сообщений */
     .messages-container {
-        padding-bottom: 20px;
+        padding-bottom: 80px;
+        margin-bottom: 0;
+    }
+
+    /* Чат занимает всю высоту */
+    .chat-active {
+        height: 100%;
     }
 }
