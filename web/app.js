@@ -239,6 +239,14 @@ function showTypingIndicator(userId) {
 
 // === ЧАТ ===
 function initChatListeners() {
+    // Кнопка "Назад" для мобильных
+    document.getElementById('mobile-back-btn').addEventListener('click', () => {
+        const sidebar = document.querySelector('.sidebar');
+        const chatMain = document.querySelector('.chat-main');
+        sidebar.classList.remove('hide');
+        chatMain.classList.remove('show');
+    });
+
     // Переключение табов sidebar
     document.querySelectorAll('.sidebar-tab').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -405,6 +413,14 @@ async function openChat(contact, type) {
 
     document.querySelector('.chat-welcome').style.display = 'none';
     document.querySelector('.chat-active').style.display = 'flex';
+
+    // Для мобильных: скрыть sidebar и показать chat-main
+    const sidebar = document.querySelector('.sidebar');
+    const chatMain = document.querySelector('.chat-main');
+    if (window.innerWidth <= 768) {
+        sidebar.classList.add('hide');
+        chatMain.classList.add('show');
+    }
 
     const emoji = type === 'group' ? '💼' : '👤';
     const name = type === 'group' ? contact.name : contact.full_name;
