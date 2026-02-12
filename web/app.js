@@ -49,6 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', unlockAudio, { once: true });
     document.addEventListener('touchstart', unlockAudio, { once: true });
 
+    // Переподключение WebSocket при возврате в приложение (для iOS Safari)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && currentUser && ws) {
+            // Приложение стало видимым
+            console.log('[WebSocket] Проверка соединения после возврата');
+            if (ws.readyState !== WebSocket.OPEN) {
+                console.log('[WebSocket] Переподключение...');
+                connectWebSocket();
+            }
+            // Обновляем список сообщений активного чата
+            if (activeChat) {
+                loadMessages();
+            }
+        }
+    });
+
     // Обработка виртуального viewport для мобильных (Android)
     if (window.visualViewport && window.innerWidth <= 768) {
         window.visualViewport.addEventListener('resize', () => {
@@ -323,8 +339,14 @@ function handleWebSocketMessage(data) {
              (data.sender_id === currentUser.id && data.recipient_id === activeChat.id) ||
              (data.group_id === activeChat.id));
 
-        // Если это активный чат - добавить сообщение
-        if (isActiveChat) {
+        // Проверяем действительно ли чат виден (не только открыт в памяти)
+        const chatMainVisible = document.querySelector('.chat-main')?.style.display !== 'none' &&
+                                document.querySelector('.chat-active')?.style.display !== 'none';
+
+        const shouldShowInChat = isActiveChat && chatMainVisible;
+
+        // Если это активный и ВИДИМЫЙ чат - добавить сообщение
+        if (shouldShowInChat) {
             // Проверить, не добавлено ли уже это сообщение
             const container = document.getElementById('messages-container');
             const existingMessage = container.querySelector(`[data-message-id="${data.id}"]`);
@@ -332,7 +354,7 @@ function handleWebSocketMessage(data) {
                 appendMessage(data);
             }
         } else if (data.sender_id !== currentUser.id) {
-            // Если сообщение не в активном чате и не от нас - увеличить счётчик непрочитанных
+            // Если сообщение не в видимом чате и не от нас - увеличить счётчик непрочитанных
             const chatId = data.group_id || data.sender_id;
             incrementUnreadCount(chatId);
         }
