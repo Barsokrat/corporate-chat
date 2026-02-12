@@ -242,7 +242,14 @@ function incrementUnreadCount(chatId) {
 }
 
 function playNotificationSound() {
-    // Проверяем что звук разрешён браузером
+    // Для мобильных используем вибрацию как альтернативу
+    if ('vibrate' in navigator) {
+        // Паттерн вибрации: [вибрация, пауза, вибрация]
+        navigator.vibrate([200, 100, 200]);
+        console.log('[Notification] Вибрация включена');
+    }
+
+    // Пробуем также воспроизвести звук (на десктопе сработает)
     notificationSound.currentTime = 0; // Сбрасываем на начало
     const playPromise = notificationSound.play();
 
@@ -250,8 +257,7 @@ function playNotificationSound() {
         playPromise.then(() => {
             console.log('[Audio] Звук воспроизведён успешно');
         }).catch(error => {
-            console.log('[Audio] Не удалось воспроизвести звук:', error.message);
-            // Браузер блокирует автовоспроизведение до первого взаимодействия пользователя
+            console.log('[Audio] Звук заблокирован, используем только вибрацию:', error.message);
         });
     }
 }
