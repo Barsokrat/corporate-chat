@@ -13,6 +13,9 @@ let messages = {};
 let typingTimeout = null;
 let unreadMessages = {}; // { chatId: count }
 
+// Звук уведомления
+const notificationSound = new Audio('/static/notification.mp3');
+
 // === ИНИЦИАЛИЗАЦИЯ ===
 document.addEventListener('DOMContentLoaded', () => {
     // Проверка сохраненного токена
@@ -217,6 +220,15 @@ function incrementUnreadCount(chatId) {
     unreadMessages[chatId] = (unreadMessages[chatId] || 0) + 1;
     console.log(`[Unread] Increment: chatId=${chatId}, count=${unreadMessages[chatId]}`);
     updateContactBadge(chatId);
+    playNotificationSound();
+}
+
+function playNotificationSound() {
+    // Проверяем что звук разрешён браузером
+    notificationSound.play().catch(error => {
+        console.log('Не удалось воспроизвести звук:', error);
+        // Браузер блокирует автовоспроизведение до первого взаимодействия пользователя
+    });
 }
 
 function clearUnreadCount(chatId) {
