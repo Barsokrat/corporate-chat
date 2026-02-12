@@ -733,4 +733,21 @@ body {
     .chat-active {
         height: 100%;
     }
+
+    /* Badge для мобильных - более заметный */
+    .unread-badge {
+        min-width: 24px;
+        height: 24px;
+        font-size: 12px;
+        padding: 4px 8px;
+        margin-left: 8px;
+    }
+
+    /* Уменьшаем имя контакта чтобы было место для badge */
+    .contact-name {
+        max-width: calc(100vw - 180px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }

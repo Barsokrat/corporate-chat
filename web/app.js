@@ -215,32 +215,45 @@ function getUnreadCount(chatId, type) {
 
 function incrementUnreadCount(chatId) {
     unreadMessages[chatId] = (unreadMessages[chatId] || 0) + 1;
+    console.log(`[Unread] Increment: chatId=${chatId}, count=${unreadMessages[chatId]}`);
     updateContactBadge(chatId);
 }
 
 function clearUnreadCount(chatId) {
     unreadMessages[chatId] = 0;
+    console.log(`[Unread] Clear: chatId=${chatId}`);
     updateContactBadge(chatId);
 }
 
 function updateContactBadge(chatId) {
     const contactItem = document.querySelector(`.contact-item[data-id="${chatId}"]`);
-    if (!contactItem) return;
+    console.log(`[Unread] Update badge: chatId=${chatId}, found=${!!contactItem}`);
+
+    if (!contactItem) {
+        console.warn(`[Unread] Contact item not found for chatId=${chatId}`);
+        return;
+    }
 
     const existingBadge = contactItem.querySelector('.unread-badge');
     const count = unreadMessages[chatId] || 0;
 
+    console.log(`[Unread] Existing badge=${!!existingBadge}, count=${count}`);
+
     if (count > 0) {
         if (existingBadge) {
             existingBadge.textContent = count;
+            console.log(`[Unread] Updated existing badge to ${count}`);
         } else {
             const badge = document.createElement('span');
             badge.className = 'unread-badge';
             badge.textContent = count;
+            badge.style.backgroundColor = '#e74c3c'; // Явно задаём цвет для отладки
             contactItem.appendChild(badge);
+            console.log(`[Unread] Created new badge with count ${count}`);
         }
     } else if (existingBadge) {
         existingBadge.remove();
+        console.log(`[Unread] Removed badge`);
     }
 }
 
