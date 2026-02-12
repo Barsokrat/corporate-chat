@@ -15,6 +15,8 @@ let unreadMessages = {}; // { chatId: count }
 
 // Звук уведомления
 const notificationSound = new Audio('/static/notification.mp3');
+notificationSound.volume = 0.5; // Устанавливаем громкость
+notificationSound.preload = 'auto'; // Предзагружаем звук
 
 // === ИНИЦИАЛИЗАЦИЯ ===
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,6 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initAuthListeners();
     // initChatListeners() теперь вызывается в showChatScreen()
+
+    // Разблокировка звука при первом взаимодействии (для мобильных)
+    const unlockAudio = () => {
+        notificationSound.play().then(() => {
+            notificationSound.pause();
+            notificationSound.currentTime = 0;
+            console.log('[Audio] Звук разблокирован для воспроизведения');
+        }).catch(err => {
+            console.log('[Audio] Ожидание взаимодействия для разблокировки звука');
+        });
+        // Удаляем обработчик после первого срабатывания
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('touchstart', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('touchstart', unlockAudio, { once: true });
 
     // Обработка виртуального viewport для мобильных (Android)
     if (window.visualViewport && window.innerWidth <= 768) {
@@ -225,10 +243,17 @@ function incrementUnreadCount(chatId) {
 
 function playNotificationSound() {
     // Проверяем что звук разрешён браузером
-    notificationSound.play().catch(error => {
-        console.log('Не удалось воспроизвести звук:', error);
-        // Браузер блокирует автовоспроизведение до первого взаимодействия пользователя
-    });
+    notificationSound.currentTime = 0; // Сбрасываем на начало
+    const playPromise = notificationSound.play();
+
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            console.log('[Audio] Звук воспроизведён успешно');
+        }).catch(error => {
+            console.log('[Audio] Не удалось воспроизвести звук:', error.message);
+            // Браузер блокирует автовоспроизведение до первого взаимодействия пользователя
+        });
+    }
 }
 
 function clearUnreadCount(chatId) {
