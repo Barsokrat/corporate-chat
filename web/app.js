@@ -340,10 +340,16 @@ function handleWebSocketMessage(data) {
              (data.group_id === activeChat.id));
 
         // Проверяем действительно ли чат виден (не только открыт в памяти)
-        const chatMainVisible = document.querySelector('.chat-main')?.style.display !== 'none' &&
-                                document.querySelector('.chat-active')?.style.display !== 'none';
+        // На мобильных проверяем класс .show, на десктопе - что chat-active visible
+        const chatMain = document.querySelector('.chat-main');
+        const isMobile = window.innerWidth <= 768;
+        const chatMainVisible = isMobile
+            ? chatMain?.classList.contains('show')  // На мобильных проверяем класс
+            : (chatMain?.style.display !== 'none' && document.querySelector('.chat-active')?.style.display !== 'none');
 
         const shouldShowInChat = isActiveChat && chatMainVisible;
+
+        console.log(`[Message] isActive=${isActiveChat}, visible=${chatMainVisible}, shouldShow=${shouldShowInChat}`);
 
         // Если это активный и ВИДИМЫЙ чат - добавить сообщение
         if (shouldShowInChat) {
@@ -386,6 +392,16 @@ function initChatListeners() {
         const chatMain = document.querySelector('.chat-main');
         sidebar.classList.remove('hide');
         chatMain.classList.remove('show');
+
+        // Очищаем активный чат чтобы уведомления работали
+        activeChat = null;
+
+        // Убираем active класс со всех контактов
+        document.querySelectorAll('.contact-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        console.log('[Navigation] Возврат к списку контактов, activeChat очищен');
     });
 
     // Переключение табов sidebar
